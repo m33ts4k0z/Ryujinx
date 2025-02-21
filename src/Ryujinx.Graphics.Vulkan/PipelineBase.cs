@@ -822,6 +822,15 @@ namespace Ryujinx.Graphics.Vulkan
             _newState.DepthWriteEnable = depthTest.WriteEnable;
             _newState.DepthCompareOp = depthTest.Func.Convert();
 
+            // Special handling for silhouette rendering
+            if (depthTest.TestEnable && !depthTest.WriteEnable)
+            {
+                // When depth testing is enabled but depth writing is disabled,
+                // this is often used for rendering see-through effects
+                _newState.DepthCompareOp = Silk.NET.Vulkan.CompareOp.Greater;  // Try Greater instead of LessOrEqual
+                //_newState.DepthTestEnable = true;  // Force depth testing on
+            }
+
             UpdatePassDepthStencil();
             SignalStateChange();
         }
